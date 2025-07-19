@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body:fullscreen {
+  cursor: none;
+}
+
+body:-webkit-full-screen {
+  cursor: none;
+}
+
+body:-moz-full-screen {
+  cursor: none;
+}
