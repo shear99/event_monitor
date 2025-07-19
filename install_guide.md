@@ -121,8 +121,7 @@ sudo vim /etc/xdg/autostart/unclutter.desktop
 [Desktop Entry]
 Name=Unclutter
 Comment=Hide the mouse cursor after a period of inactivity
-Exec=unclutter-xfixes --start-hidden --hide-on-touch # --start-hidden: 데스크톱 시작 시부터 커서를 숨기기
-                                                     #--hide-on-touch: 터치스크린 입력이 있을 때도 커서를 숨기기.
+Exec=unclutter-xfixes --start-hidden --hide-on-touch 
 Terminal=false
 Type=Application
 ```
@@ -138,10 +137,10 @@ sudo reboot now
 ## 시스템 시작 시 영상 재생 자동화
 - npm 실행 -> 웹 브라우저 실행 -> 전체화면 (f11) 순으로 실행하는 스크립트 작성 후 실행하는 구조
 
-### 1단계: 실행 스크립트 생성 (start-app.sh)
+### 1단계: 실행 스크립트 생성 (start-nextapp.sh)
 ```bash
 cd ~/
-vim ~/start-app.sh
+vim ~/start-nextapp.sh
 ```
 
 - 아래 내용 그대로 복사 (#!/bin/bash 반드시 포함해야함)
@@ -159,7 +158,7 @@ npm start
 
 - 실행파일에 실행 권한 부여
 ```bash
-chmod +x ~/start-app.sh
+chmod +x ~/start-nextapp.sh
 ```
 
 ### 2단계: Next.js 앱 서비스 생성 (nextapp.service)
@@ -185,12 +184,12 @@ After=network.target
 [Service]
 # 'whoami' 명령어로 확인한 실제 사용자 이름으로 변경하세요.
 User={user_name}
-
+Group={user_name}
 # Next.js 프로젝트가 있는 실제 전체 경로로 변경하세요.
 WorkingDirectory=/home/{user_name}/Downloads
 
 # 1단계에서 만든 실행 스크립트의 전체 경로를 지정합니다.
-ExecStart=/home/{user_name}/start-app.sh
+ExecStart=/home/{user_name}/start-nextapp.sh
 
 Restart=always
 
@@ -216,7 +215,7 @@ After=graphical-session.target
 [Service]
 # 'whoami' 명령어로 확인한 실제 사용자 이름으로 변경하세요.
 User={user_name}
-
+Group={user_name}
 Environment=DISPLAY=:0
 
 # Next.js 앱이 완전히 준비될 때까지 기다리는 시간입니다. (필요시 조절)
