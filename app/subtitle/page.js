@@ -44,6 +44,25 @@ export default function SubtitleEditor() {
     }
   };
 
+  const handleZoom = async (action) => {
+    try {
+      const response = await fetch('/api/zoom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setMessage(data.message);
+        setTimeout(() => setMessage(''), 3000);
+      }
+    } catch (error) {
+      setMessage('줌 제어 실패: ' + error.message);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
   const handleSave = async () => {
     setLoading(true);
     setMessage('');
@@ -101,6 +120,56 @@ export default function SubtitleEditor() {
         </div>
         
         <div className="p-8">
+          <div className="mb-6">
+            <div className="flex items-center mb-4">
+              <div className="w-1 h-8 bg-purple-500 rounded-full mr-4"></div>
+              <h2 className="text-2xl font-bold text-gray-800">화면 줌 제어</h2>
+              <span className="ml-3 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Remote Control</span>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => handleZoom('zoomIn')}
+                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                  🔍+ 확대
+                </button>
+                <button
+                  onClick={() => handleZoom('zoomOut')}
+                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                  🔍- 축소
+                </button>
+                <button
+                  onClick={() => handleZoom('zoomReset')}
+                  className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                  🔄 원래크기
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mb-10">
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-12 rounded-xl text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                  저장 중...
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <span className="mr-2">💾</span>
+                  저장 및 모든 화면 새로고침
+                </div>
+              )}
+            </button>
+          </div>
+
           <div className="mb-10">
             <div className="flex items-center mb-4">
               <div className="w-1 h-8 bg-blue-500 rounded-full mr-4"></div>
@@ -111,7 +180,7 @@ export default function SubtitleEditor() {
               <textarea
                 value={subtitleContent}
                 onChange={(e) => setSubtitleContent(e.target.value)}
-                className="w-full h-[450px] p-6 border-2 border-gray-300 rounded-xl resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg leading-relaxed"
+                className="w-full h-[300px] p-6 border-2 border-gray-300 rounded-xl resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg leading-relaxed"
                 placeholder="자막 내용을 입력하세요..."
                 style={{ fontFamily: 'monospace' }}
               />
@@ -249,25 +318,7 @@ export default function SubtitleEditor() {
             </div>
           </div>
 
-          <div className="text-center">
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-12 rounded-xl text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                  저장 중...
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <span className="mr-2">💾</span>
-                  저장 및 모든 화면 새로고침
-                </div>
-              )}
-            </button>
-          </div>
+
 
           {message && (
             <div className={`mt-6 p-6 rounded-xl text-center text-lg font-semibold shadow-lg ${

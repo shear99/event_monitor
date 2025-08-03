@@ -37,6 +37,7 @@ export default function Home() {
     
     // 실시간 새로고침 리스너
     const eventSource = new EventSource('/api/refresh');
+    const zoomEventSource = new EventSource('/api/zoom');
     
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -46,14 +47,44 @@ export default function Home() {
       }
     };
     
+    zoomEventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'zoom') {
+        console.log('줌 제어 신호 수신:', data.action);
+        const currentZoom = parseFloat(document.body.style.getPropertyValue('--zoom-level') || '1');
+        let newZoom = currentZoom;
+        
+        if (data.action === 'zoomIn') {
+          newZoom = Math.min(3, currentZoom + 0.1);
+        } else if (data.action === 'zoomOut') {
+          newZoom = Math.max(0.5, currentZoom - 0.1);
+        } else if (data.action === 'zoomReset') {
+          newZoom = 1;
+        }
+        
+        document.body.style.setProperty('--zoom-level', newZoom.toString());
+        document.body.style.transform = `scale(${newZoom})`;
+        document.body.style.transformOrigin = 'top left';
+        document.body.style.width = `${100/newZoom}%`;
+        document.body.style.height = `${100/newZoom}%`;
+        
+        console.log('줌 레벨 변경:', newZoom);
+      }
+    };
+    
     eventSource.onerror = (error) => {
       console.error('EventSource 오류:', error);
+    };
+    
+    zoomEventSource.onerror = (error) => {
+      console.error('Zoom EventSource 오류:', error);
     };
     
     loadConfig();
     
     return () => {
       eventSource.close();
+      zoomEventSource.close();
     };
   }, []);
   const [clockPeriodOffset, setClockPeriodOffset] = useState(-14);
