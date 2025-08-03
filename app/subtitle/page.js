@@ -8,6 +8,7 @@ export default function SubtitleEditor() {
   const [clockPeriodFontSize, setClockPeriodFontSize] = useState(40);
   const [subtitleFontSize, setSubtitleFontSize] = useState(100);
   const [subtitleSmallFontSize, setSubtitleSmallFontSize] = useState(50);
+  const [subtitleLineHeight, setSubtitleLineHeight] = useState(1.2);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -38,6 +39,7 @@ export default function SubtitleEditor() {
         setClockPeriodFontSize(config.clockPeriodFontSize || 40);
         setSubtitleFontSize(config.subtitleFontSize || 100);
         setSubtitleSmallFontSize(config.subtitleSmallFontSize || 50);
+        setSubtitleLineHeight(config.subtitleLineHeight || 1.2);
       }
     } catch (error) {
       console.error('데이터 로드 실패:', error);
@@ -82,7 +84,8 @@ export default function SubtitleEditor() {
           clockDateFontSize,
           clockPeriodFontSize,
           subtitleFontSize,
-          subtitleSmallFontSize
+          subtitleSmallFontSize,
+          subtitleLineHeight
         })
       });
 
@@ -201,7 +204,7 @@ export default function SubtitleEditor() {
               <span className="ml-3 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Clock Component</span>
             </div>
             <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="flex flex-wrap gap-6 justify-center">
                 <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
                   <label className="block text-lg font-semibold mb-3 text-gray-700">⏰ 시간</label>
                   <div className="text-center mb-3">
@@ -273,7 +276,7 @@ export default function SubtitleEditor() {
               <span className="ml-3 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">Subtitle Component</span>
             </div>
             <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-wrap gap-6 justify-center">
                 <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
                   <label className="block text-lg font-semibold mb-3 text-gray-700">📝 일반 텍스트</label>
                   <div className="text-center mb-3">
@@ -312,6 +315,30 @@ export default function SubtitleEditor() {
                     value={subtitleSmallFontSize}
                     onChange={(e) => setSubtitleSmallFontSize(Number(e.target.value))}
                     className="w-full mt-3 p-3 border-2 border-gray-300 rounded-lg text-center font-mono text-lg focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                  />
+                </div>
+                <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+                  <label className="block text-lg font-semibold mb-3 text-gray-700">📏 줄간격</label>
+                  <div className="text-center mb-3">
+                    <span className="text-3xl font-bold text-indigo-600">{subtitleLineHeight}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.8"
+                    max="2.0"
+                    step="0.1"
+                    value={subtitleLineHeight}
+                    onChange={(e) => setSubtitleLineHeight(Number(e.target.value))}
+                    className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <input
+                    type="number"
+                    min="0.8"
+                    max="2.0"
+                    step="0.1"
+                    value={subtitleLineHeight}
+                    onChange={(e) => setSubtitleLineHeight(Number(e.target.value))}
+                    className="w-full mt-3 p-3 border-2 border-gray-300 rounded-lg text-center font-mono text-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                   />
                 </div>
               </div>

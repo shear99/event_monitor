@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-export default function Subtitle({ fontSize = 92, smallFontSize = 46 }) {
+export default function Subtitle({ fontSize = 92, smallFontSize = 46, lineHeight = 1.2 }) {
   const [subtitles, setSubtitles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -82,7 +82,7 @@ export default function Subtitle({ fontSize = 92, smallFontSize = 46 }) {
       });
       
       return (
-        <div key={lineIndex}>
+        <div key={lineIndex} style={{ lineHeight: lineHeight }}>
           {renderedLine}
         </div>
       );

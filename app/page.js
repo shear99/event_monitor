@@ -13,6 +13,7 @@ export default function Home() {
   const [fontSize, setFontSize] = useState(48);
   const [subtitleFontSize, setSubtitleFontSize] = useState(100);
   const [subtitleSmallFontSize, setSubtitleSmallFontSize] = useState(50);
+  const [subtitleLineHeight, setSubtitleLineHeight] = useState(1.2);
   const [clockDateFontSize, setClockDateFontSize] = useState(60);
   const [clockTimeFontSize, setClockTimeFontSize] = useState(120);
   const [clockPeriodFontSize, setClockPeriodFontSize] = useState(40);
@@ -29,6 +30,7 @@ export default function Home() {
           setClockPeriodFontSize(config.clockPeriodFontSize || 40);
           setSubtitleFontSize(config.subtitleFontSize || 100);
           setSubtitleSmallFontSize(config.subtitleSmallFontSize || 50);
+          setSubtitleLineHeight(config.subtitleLineHeight || 1.2);
         }
       } catch (error) {
         console.error('설정 로드 실패:', error);
@@ -236,7 +238,7 @@ export default function Home() {
             justifyContent: 'flex-start'
           }}
         >
-          <Subtitle fontSize={subtitleFontSize} smallFontSize={subtitleSmallFontSize} />
+          <Subtitle fontSize={subtitleFontSize} smallFontSize={subtitleSmallFontSize} lineHeight={subtitleLineHeight} />
         </div>
         
         {/* Right Header - 470x208 at (2015, 51) */}

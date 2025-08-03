@@ -3,5 +3,6 @@
   "clockDateFontSize": 60,
   "clockPeriodFontSize": 40,
   "subtitleFontSize": 96,
-  "subtitleSmallFontSize": 50
+  "subtitleSmallFontSize": 50,
+  "subtitleLineHeight": 1
 }

@@ -11,7 +11,8 @@ export async function GET() {
       clockDateFontSize: 60,
       clockPeriodFontSize: 40,
       subtitleFontSize: 100,
-      subtitleSmallFontSize: 50
+      subtitleSmallFontSize: 50,
+      subtitleLineHeight: 1.2
     };
     
     if (fs.existsSync(CONFIG_FILE)) {
