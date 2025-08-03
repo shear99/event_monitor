@@ -11,11 +11,51 @@ export default function Home() {
   const [floorData, setFloorData] = useState({});
   const [testTime, setTestTime] = useState(null);
   const [fontSize, setFontSize] = useState(48);
-  const [subtitleFontSize, setSubtitleFontSize] = useState(92);
-  const [subtitleSmallFontSize, setSubtitleSmallFontSize] = useState(46);
-  const [clockDateFontSize, setClockDateFontSize] = useState(44);
-  const [clockTimeFontSize, setClockTimeFontSize] = useState(88);
-  const [clockPeriodFontSize, setClockPeriodFontSize] = useState(28);
+  const [subtitleFontSize, setSubtitleFontSize] = useState(100);
+  const [subtitleSmallFontSize, setSubtitleSmallFontSize] = useState(50);
+  const [clockDateFontSize, setClockDateFontSize] = useState(60);
+  const [clockTimeFontSize, setClockTimeFontSize] = useState(120);
+  const [clockPeriodFontSize, setClockPeriodFontSize] = useState(40);
+
+  // 설정값 로드 및 실시간 새로고침 리스너
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const response = await fetch('/api/config');
+        if (response.ok) {
+          const config = await response.json();
+          setClockTimeFontSize(config.clockTimeFontSize || 120);
+          setClockDateFontSize(config.clockDateFontSize || 60);
+          setClockPeriodFontSize(config.clockPeriodFontSize || 40);
+          setSubtitleFontSize(config.subtitleFontSize || 100);
+          setSubtitleSmallFontSize(config.subtitleSmallFontSize || 50);
+        }
+      } catch (error) {
+        console.error('설정 로드 실패:', error);
+      }
+    };
+    
+    // 실시간 새로고침 리스너
+    const eventSource = new EventSource('/api/refresh');
+    
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'refresh') {
+        console.log('새로고침 신호 수신, 페이지를 새로고침합니다...');
+        window.location.reload();
+      }
+    };
+    
+    eventSource.onerror = (error) => {
+      console.error('EventSource 오류:', error);
+    };
+    
+    loadConfig();
+    
+    return () => {
+      eventSource.close();
+    };
+  }, []);
   const [clockPeriodOffset, setClockPeriodOffset] = useState(-14);
   const [clockHorizontalPadding, setClockHorizontalPadding] = useState(15);
 

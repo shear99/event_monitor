@@ -8,14 +8,14 @@ export default function Subtitle({ fontSize = 92, smallFontSize = 46 }) {
 
   useEffect(() => {
     console.log('Loading subtitles...');
-    fetch('/data/subtitle.txt')
+    fetch('/api/subtitle')
       .then(response => {
         console.log('Subtitle response:', response.status);
-        return response.text();
+        return response.json();
       })
-      .then(text => {
-        console.log('Subtitle text loaded:', text);
-        const lines = text.split('\n').filter(line => line.trim() !== '');
+      .then(data => {
+        console.log('Subtitle data loaded:', data);
+        const lines = data.content.split('\n').filter(line => line.trim() !== '');
         console.log('Subtitle lines:', lines);
         setSubtitles(lines);
         setLoading(false);
