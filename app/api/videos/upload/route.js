@@ -38,11 +38,11 @@ export async function POST(request) {
           continue;
         }
         
-        // 파일 크기 제한 (100MB)
-        const maxSize = 100 * 1024 * 1024;
+        // 파일 크기 제한 (500MB)
+        const maxSize = 500 * 1024 * 1024;
         if (file.size > maxSize) {
           console.log(`❌ 파일 크기 초과: ${file.name} (${file.size} bytes)`);
-          errors.push(`${file.name}: 파일 크기가 너무 큽니다 (최대 100MB)`);
+          errors.push(`${file.name}: 파일 크기가 너무 큽니다 (최대 500MB)`);
           continue;
         }
         
