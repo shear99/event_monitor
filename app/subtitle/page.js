@@ -11,13 +11,11 @@ export default function SubtitleEditor() {
   const [subtitleLineHeight, setSubtitleLineHeight] = useState(1.2);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [expandedSection, setExpandedSection] = useState('subtitle');
 
   useEffect(() => {
     loadData();
-    // subtitle 페이지에서는 스크롤 허용
     document.body.style.overflow = 'auto';
-    
-    // 컴포넌트 언마운트 시 원래대로 복원
     return () => {
       document.body.style.overflow = 'hidden';
     };
@@ -45,7 +43,6 @@ export default function SubtitleEditor() {
       console.error('데이터 로드 실패:', error);
     }
   };
-
   const handleZoom = async (action) => {
     try {
       const response = await fetch('/api/zoom', {
@@ -92,8 +89,7 @@ export default function SubtitleEditor() {
       if (subtitleRes.ok && configRes.ok) {
         const refreshRes = await fetch('/api/refresh', {
           method: 'POST'
-        });
-        
+        });        
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json();
           setMessage(`저장 완료! ${refreshData.message}`);
@@ -101,9 +97,7 @@ export default function SubtitleEditor() {
           setMessage('저장 완료! 하지만 새로고침 신호 전송에 실패했습니다.');
         }
         
-        setTimeout(() => {
-          window.open('/', '_blank');
-        }, 1000);
+        setTimeout(() => setMessage(''), 3000);
       } else {
         setMessage('저장 실패');
       }
@@ -114,248 +108,241 @@ export default function SubtitleEditor() {
     }
   };
 
+  const toggleSection = (section) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
+
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 py-8 min-h-screen" style={{overflow: 'auto'}}>
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
-          <h1 className="text-4xl font-bold text-white text-center">🎬 자막 및 설정 편집기</h1>
-          <p className="text-blue-100 text-center mt-2">교회 빌보드 시스템 관리</p>
+    <div className="min-h-screen bg-gray-50" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
+      {/* 모바일 헤더 */}
+      <div className="sticky top-0 z-50 bg-white shadow-sm">
+        <div className="px-4 py-3">
+          <h1 className="text-xl font-bold text-gray-900">자막 및 설정</h1>
         </div>
+      </div>
+
+      {/* 메시지 표시 */}
+      {message && (
+        <div className={`mx-4 mt-4 p-3 rounded-lg text-sm font-medium ${
+          message.includes('완료') 
+            ? 'bg-green-100 text-green-800 border border-green-200' 
+            : 'bg-red-100 text-red-800 border border-red-200'
+        }`}>
+          {message}
+        </div>
+      )}
+      {/* 저장 버튼 - 상단 고정 */}
+      <div className="sticky top-14 z-40 bg-white border-b px-4 py-3">
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-lg disabled:opacity-50 active:bg-blue-700"
+        >
+          {loading ? '저장 중...' : '💾 저장 및 새로고침'}
+        </button>
+      </div>
+
+      {/* 컨텐츠 영역 */}
+      <div className="px-4 py-4 space-y-3">
         
-        <div className="p-8">
-          <div className="mb-6">
-            <div className="flex items-center mb-4">
-              <div className="w-1 h-8 bg-purple-500 rounded-full mr-4"></div>
-              <h2 className="text-2xl font-bold text-gray-800">화면 줌 제어</h2>
-              <span className="ml-3 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Remote Control</span>
+        {/* 화면 줌 제어 섹션 */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <button
+            onClick={() => toggleSection('zoom')}
+            className="w-full px-4 py-3 flex items-center justify-between"
+          >
+            <span className="font-medium text-gray-900">🔍 화면 줌 제어</span>
+            <span className="text-gray-400">{expandedSection === 'zoom' ? '−' : '+'}</span>
+          </button>
+          
+          {expandedSection === 'zoom' && (
+            <div className="px-4 pb-4 space-y-3">
+              <button
+                onClick={() => handleZoom('zoomIn')}
+                className="w-full bg-green-500 text-white font-medium py-3 rounded-lg active:bg-green-600"
+              >
+                🔍+ 확대
+              </button>
+              <button
+                onClick={() => handleZoom('zoomOut')}
+                className="w-full bg-red-500 text-white font-medium py-3 rounded-lg active:bg-red-600"
+              >
+                🔍- 축소
+              </button>
+              <button
+                onClick={() => handleZoom('zoomReset')}
+                className="w-full bg-gray-500 text-white font-medium py-3 rounded-lg active:bg-gray-600"
+              >
+                🔄 원래크기
+              </button>
             </div>
-            <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => handleZoom('zoomIn')}
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                >
-                  🔍+ 확대
-                </button>
-                <button
-                  onClick={() => handleZoom('zoomOut')}
-                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                >
-                  🔍- 축소
-                </button>
-                <button
-                  onClick={() => handleZoom('zoomReset')}
-                  className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                >
-                  🔄 원래크기
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center mb-10">
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-12 rounded-xl text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none"
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                  저장 중...
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <span className="mr-2">💾</span>
-                  저장 및 모든 화면 새로고침
-                </div>
-              )}
-            </button>
-          </div>
-
-          <div className="mb-10">
-            <div className="flex items-center mb-4">
-              <div className="w-1 h-8 bg-blue-500 rounded-full mr-4"></div>
-              <h2 className="text-2xl font-bold text-gray-800">자막 내용</h2>
-              <span className="ml-3 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">subtitle.txt</span>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+          )}
+        </div>
+        {/* 자막 내용 섹션 */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <button
+            onClick={() => toggleSection('subtitle')}
+            className="w-full px-4 py-3 flex items-center justify-between"
+          >
+            <span className="font-medium text-gray-900">📝 자막 내용</span>
+            <span className="text-gray-400">{expandedSection === 'subtitle' ? '−' : '+'}</span>
+          </button>
+          
+          {expandedSection === 'subtitle' && (
+            <div className="px-4 pb-4">
               <textarea
                 value={subtitleContent}
                 onChange={(e) => setSubtitleContent(e.target.value)}
-                className="w-full h-[300px] p-6 border-2 border-gray-300 rounded-xl resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg leading-relaxed"
+                className="w-full h-48 p-3 border border-gray-300 rounded-lg resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 placeholder="자막 내용을 입력하세요..."
-                style={{ fontFamily: 'monospace' }}
               />
-              <div className="mt-4 text-sm text-gray-600 bg-blue-50 p-4 rounded-lg">
-                <strong>💡 자막 문법:</strong>
-                <ul className="mt-2 space-y-1">
-                  <li>• & : 줄바꿈</li>
-                  <li>• $텍스트$ : 작은 글씨로 표시 (시간 등)</li>
-                </ul>
+              <div className="mt-2 p-3 bg-blue-50 rounded-lg text-xs text-gray-600">
+                <div className="font-medium mb-1">💡 자막 문법</div>
+                <div>• & : 줄바꿈</div>
+                <div>• $텍스트$ : 작은 글씨</div>
               </div>
-            </div>
-          </div>
-
-          <div className="mb-10">
-            <div className="flex items-center mb-4">
-              <div className="w-1 h-8 bg-green-500 rounded-full mr-4"></div>
-              <h2 className="text-2xl font-bold text-gray-800">시계 폰트 크기</h2>
-              <span className="ml-3 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Clock Component</span>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
-              <div className="flex flex-wrap gap-6 justify-center">
-                <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                  <label className="block text-lg font-semibold mb-3 text-gray-700">⏰ 시간</label>
-                  <div className="text-center mb-3">
-                    <span className="text-3xl font-bold text-blue-600">{clockTimeFontSize}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="60"
-                    max="200"
-                    value={clockTimeFontSize}
-                    onChange={(e) => setClockTimeFontSize(Number(e.target.value))}
-                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <input
-                    type="number"
-                    value={clockTimeFontSize}
-                    onChange={(e) => setClockTimeFontSize(Number(e.target.value))}
-                    className="w-full mt-3 p-3 border-2 border-gray-300 rounded-lg text-center font-mono text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                  <label className="block text-lg font-semibold mb-3 text-gray-700">📅 날짜</label>
-                  <div className="text-center mb-3">
-                    <span className="text-3xl font-bold text-green-600">{clockDateFontSize}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="30"
-                    max="100"
-                    value={clockDateFontSize}
-                    onChange={(e) => setClockDateFontSize(Number(e.target.value))}
-                    className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <input
-                    type="number"
-                    value={clockDateFontSize}
-                    onChange={(e) => setClockDateFontSize(Number(e.target.value))}
-                    className="w-full mt-3 p-3 border-2 border-gray-300 rounded-lg text-center font-mono text-lg focus:border-green-500 focus:ring-2 focus:ring-green-200"
-                  />
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                  <label className="block text-lg font-semibold mb-3 text-gray-700">🌅 오전/오후</label>
-                  <div className="text-center mb-3">
-                    <span className="text-3xl font-bold text-purple-600">{clockPeriodFontSize}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="20"
-                    max="80"
-                    value={clockPeriodFontSize}
-                    onChange={(e) => setClockPeriodFontSize(Number(e.target.value))}
-                    className="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <input
-                    type="number"
-                    value={clockPeriodFontSize}
-                    onChange={(e) => setClockPeriodFontSize(Number(e.target.value))}
-                    className="w-full mt-3 p-3 border-2 border-gray-300 rounded-lg text-center font-mono text-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-10">
-            <div className="flex items-center mb-4">
-              <div className="w-1 h-8 bg-orange-500 rounded-full mr-4"></div>
-              <h2 className="text-2xl font-bold text-gray-800">자막 폰트 크기</h2>
-              <span className="ml-3 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">Subtitle Component</span>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
-              <div className="flex flex-wrap gap-6 justify-center">
-                <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                  <label className="block text-lg font-semibold mb-3 text-gray-700">📝 일반 텍스트</label>
-                  <div className="text-center mb-3">
-                    <span className="text-3xl font-bold text-orange-600">{subtitleFontSize}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="50"
-                    max="150"
-                    value={subtitleFontSize}
-                    onChange={(e) => setSubtitleFontSize(Number(e.target.value))}
-                    className="w-full h-2 bg-orange-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <input
-                    type="number"
-                    value={subtitleFontSize}
-                    onChange={(e) => setSubtitleFontSize(Number(e.target.value))}
-                    className="w-full mt-3 p-3 border-2 border-gray-300 rounded-lg text-center font-mono text-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                  />
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                  <label className="block text-lg font-semibold mb-3 text-gray-700">🔤 작은 텍스트 ($표시)</label>
-                  <div className="text-center mb-3">
-                    <span className="text-3xl font-bold text-red-600">{subtitleSmallFontSize}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="25"
-                    max="100"
-                    value={subtitleSmallFontSize}
-                    onChange={(e) => setSubtitleSmallFontSize(Number(e.target.value))}
-                    className="w-full h-2 bg-red-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <input
-                    type="number"
-                    value={subtitleSmallFontSize}
-                    onChange={(e) => setSubtitleSmallFontSize(Number(e.target.value))}
-                    className="w-full mt-3 p-3 border-2 border-gray-300 rounded-lg text-center font-mono text-lg focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                  />
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                  <label className="block text-lg font-semibold mb-3 text-gray-700">📏 줄간격</label>
-                  <div className="text-center mb-3">
-                    <span className="text-3xl font-bold text-indigo-600">{subtitleLineHeight}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0.8"
-                    max="2.0"
-                    step="0.1"
-                    value={subtitleLineHeight}
-                    onChange={(e) => setSubtitleLineHeight(Number(e.target.value))}
-                    className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <input
-                    type="number"
-                    min="0.8"
-                    max="2.0"
-                    step="0.1"
-                    value={subtitleLineHeight}
-                    onChange={(e) => setSubtitleLineHeight(Number(e.target.value))}
-                    className="w-full mt-3 p-3 border-2 border-gray-300 rounded-lg text-center font-mono text-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-
-          {message && (
-            <div className={`mt-6 p-6 rounded-xl text-center text-lg font-semibold shadow-lg ${
-              message.includes('완료') 
-                ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-2 border-green-200' 
-                : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-2 border-red-200'
-            }`}>
-              {message}
             </div>
           )}
+        </div>
+
+        {/* 시계 폰트 크기 섹션 */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <button
+            onClick={() => toggleSection('clock')}
+            className="w-full px-4 py-3 flex items-center justify-between"
+          >
+            <span className="font-medium text-gray-900">⏰ 시계 폰트 크기</span>
+            <span className="text-gray-400">{expandedSection === 'clock' ? '−' : '+'}</span>
+          </button>
+          
+          {expandedSection === 'clock' && (
+            <div className="px-4 pb-4 space-y-4">
+              {/* 시간 폰트 크기 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  시간 ({clockTimeFontSize}px)
+                </label>
+                <input
+                  type="range"
+                  min="80"
+                  max="200"
+                  value={clockTimeFontSize}
+                  onChange={(e) => setClockTimeFontSize(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+              
+              {/* 날짜 폰트 크기 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  날짜 ({clockDateFontSize}px)
+                </label>
+                <input
+                  type="range"
+                  min="40"
+                  max="120"
+                  value={clockDateFontSize}
+                  onChange={(e) => setClockDateFontSize(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+              
+              {/* 오전/오후 폰트 크기 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  오전/오후 ({clockPeriodFontSize}px)
+                </label>
+                <input
+                  type="range"
+                  min="20"
+                  max="80"
+                  value={clockPeriodFontSize}
+                  onChange={(e) => setClockPeriodFontSize(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 자막 폰트 크기 섹션 */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <button
+            onClick={() => toggleSection('subtitleFont')}
+            className="w-full px-4 py-3 flex items-center justify-between"
+          >
+            <span className="font-medium text-gray-900">📏 자막 폰트 크기</span>
+            <span className="text-gray-400">{expandedSection === 'subtitleFont' ? '−' : '+'}</span>
+          </button>
+          
+          {expandedSection === 'subtitleFont' && (
+            <div className="px-4 pb-4 space-y-4">
+              {/* 일반 텍스트 크기 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  일반 텍스트 ({subtitleFontSize}px)
+                </label>
+                <input
+                  type="range"
+                  min="50"
+                  max="150"
+                  value={subtitleFontSize}
+                  onChange={(e) => setSubtitleFontSize(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>              
+              {/* 작은 텍스트 크기 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  작은 텍스트 ({subtitleSmallFontSize}px)
+                </label>
+                <input
+                  type="range"
+                  min="25"
+                  max="100"
+                  value={subtitleSmallFontSize}
+                  onChange={(e) => setSubtitleSmallFontSize(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+              
+              {/* 줄간격 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  줄간격 ({subtitleLineHeight})
+                </label>
+                <input
+                  type="range"
+                  min="0.8"
+                  max="2.0"
+                  step="0.1"
+                  value={subtitleLineHeight}
+                  onChange={(e) => setSubtitleLineHeight(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 빠른 링크 섹션 */}
+        <div className="bg-white rounded-lg shadow-sm p-4">
+          <h3 className="font-medium text-gray-900 mb-3">🔗 빠른 링크</h3>
+          <div className="space-y-2">
+            <a 
+              href="/"
+              target="_blank"
+              className="block w-full bg-gray-100 text-gray-700 font-medium py-3 px-4 rounded-lg text-center"
+            >
+              📺 메인 화면 보기
+            </a>
+            <a 
+              href="/list"
+              className="block w-full bg-gray-100 text-gray-700 font-medium py-3 px-4 rounded-lg text-center"
+            >
+              📹 비디오 관리
+            </a>
+          </div>
         </div>
       </div>
     </div>

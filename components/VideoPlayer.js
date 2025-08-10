@@ -7,7 +7,7 @@ export default function VideoPlayer() {
   const [videoList, setVideoList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadVideos = () => {
     fetch('/api/videos')
       .then(response => response.json())
       .then(videos => {
@@ -19,6 +19,24 @@ export default function VideoPlayer() {
         console.error('Error loading video list:', error);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadVideos();
+    
+    // 새로고침 이벤트 리스너
+    const handleRefresh = () => {
+      console.log('Refreshing video list...');
+      setLoading(true);
+      setCurrentVideoIndex(0);
+      loadVideos();
+    };
+    
+    window.addEventListener('videoRefresh', handleRefresh);
+    
+    return () => {
+      window.removeEventListener('videoRefresh', handleRefresh);
+    };
   }, []);
 
   const playNextVideo = () => {
@@ -37,9 +55,10 @@ export default function VideoPlayer() {
 
     console.log(`Loading video ${currentVideoIndex}: ${videoList[currentVideoIndex]}`);
     
-    // 비디오 속성 설정
-    video.muted = true;
-    video.defaultMuted = true;
+    // 비디오 속성 설정 (소리 활성화)
+    video.muted = false;
+    video.defaultMuted = false;
+    video.volume = 0.8;
     video.setAttribute('webkit-playsinline', 'true');
     video.setAttribute('x5-playsinline', 'true');
     
@@ -67,9 +86,14 @@ export default function VideoPlayer() {
       console.log(`Video can play: ${videoList[currentVideoIndex]}`);
       video.play().catch(e => {
         console.error('Auto play failed:', e);
-        // 음소거 상태에서 재시도
+        // 음소거 상태에서 재시도 (브라우저 정책으로 인해)
         video.muted = true;
-        video.play().catch(e2 => console.error('Manual play failed:', e2));
+        video.play().then(() => {
+          // 재생 시작 후 음소거 해제 시도
+          setTimeout(() => {
+            video.muted = false;
+          }, 1000);
+        }).catch(e2 => console.error('Manual play failed:', e2));
       });
     };
 
@@ -105,7 +129,6 @@ export default function VideoPlayer() {
     <video
       ref={videoRef}
       className="w-full h-full object-cover"
-      muted
       autoPlay
       playsInline
       preload="auto"

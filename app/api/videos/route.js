@@ -11,11 +11,13 @@ export async function GET() {
     }
     
     const files = fs.readdirSync(videoDir);
-    const videoFiles = files.filter(file => 
-      file.toLowerCase().endsWith('.mp4') || 
-      file.toLowerCase().endsWith('.webm') || 
-      file.toLowerCase().endsWith('.ogg')
-    ).sort();
+    const videoFiles = files.filter(file => {
+      const isVideo = file.toLowerCase().endsWith('.mp4') || 
+                     file.toLowerCase().endsWith('.webm') || 
+                     file.toLowerCase().endsWith('.ogg');
+      const isNotTempFile = !file.startsWith('._') && !file.startsWith('.DS_Store');
+      return isVideo && isNotTempFile;
+    }).sort();
     
     return NextResponse.json(videoFiles);
   } catch (error) {
